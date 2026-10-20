@@ -114,6 +114,11 @@ async function init() {
   const sel = $("#accountSelect");
   sel.innerHTML = CFG.accounts.map((a) => `<option value="${a.address}">${esc(a.label)}</option>`).join("");
   sel.onchange = () => setAccount(sel.value);
+  const roleAccount = $("#roleAccount");
+  roleAccount.innerHTML =
+    '<option value="">– choose an account –</option>' +
+    CFG.accounts.map((a) => `<option value="${a.address}">${esc(a.label)}</option>`).join("");
+  roleAccount.onchange = () => ($("#roleForm").addr.value = roleAccount.value);
   $("#setterSelect").innerHTML = CFG.accounts
     .filter((a) => a.role === "SETTER")
     .map((a) => `<option value="${a.address}">${esc(a.label)}</option>`)

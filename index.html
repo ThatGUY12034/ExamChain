@@ -66,7 +66,9 @@
         </form>
         <form id="roleForm" class="panel">
           <h3>Grant a role</h3>
-          <label>Wallet address <input name="addr" required placeholder="0x…" /></label>
+          <p class="hint">Demo accounts already have their roles from deployment. Use this to add a new person.</p>
+          <label>Pick an account <select id="roleAccount"></select></label>
+          <label>Wallet address <input name="addr" required placeholder="0x… (filled from the account above, or paste any address)" /></label>
           <label>Role
             <select name="role">
               <option value="addSetter">Paper Setter</option>

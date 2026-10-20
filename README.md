@@ -50,7 +50,7 @@ npm test
 Use the **"Acting as"** dropdown (top right) to switch between users. Each one is a different blockchain wallet.
 
 1. **Admin** → *Admin* tab → schedule exam with **+2 min** unlock time.
-2. **Paper Setter** → *Paper Setter* tab → choose any PDF → **Encrypt & upload**.
+2. **Paper Setter** → *Paper Setter* tab → choose a PDF (samples in `demo-papers/`) → **Encrypt & upload**.
    Download the `.enc` file and the secret key.
 3. Still as Setter → try **Release key** → ❌ *"Exam has not started yet"* (time-lock works).
 4. **Exam Center – Mumbai** → *Exam Center* tab → load the `.enc` file → **Verify & log receipt** ✅.

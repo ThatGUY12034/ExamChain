@@ -1,6 +1,6 @@
 /* ExamChain dashboard - talks to the ExamChain smart contract with ethers.js */
 const { ethers } = window;
-const CFG = window.EXAMCHAIN;
+let CFG = window.EXAMCHAIN; // set by deploy.js for a local node; built in the browser otherwise
 const STATUS = ["Scheduled", "Uploaded", "Released", "Compromised", "Cancelled"];
 const REQUIRED_APPROVALS = 2;
 
@@ -38,7 +38,7 @@ function toast(msg, kind = "") {
 
 function reason(e) {
   const msg = e?.info?.error?.message || e?.error?.message || e?.shortMessage || e?.message || String(e);
-  return e?.reason || (msg.match(/reason string '([^']+)'/) || [])[1] || msg;
+  return e?.reason || (msg.match(/reason string '([^']+)'/) || msg.match(/revert ([^"]+)/) || [])[1] || msg;
 }
 
 function countdown(unlock) {
@@ -94,18 +94,63 @@ function examById(id) {
 
 // ---------------------------------------------------------------- setup
 
-async function init() {
-  if (!CFG) {
-    document.querySelector("main").innerHTML =
-      '<div class="panel">config.js not found. Start the node and run <code>npm run deploy</code> first.</div>';
-    return;
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = src;
+    s.onload = resolve;
+    s.onerror = () => reject(new Error("Failed to load " + src));
+    document.head.appendChild(s);
+  });
+}
+
+/** Hosted demo: runs an Ethereum blockchain (Ganache) inside the browser and deploys ExamChain to it. */
+async function startInBrowserChain() {
+  $("main").insertAdjacentHTML(
+    "afterbegin",
+    '<div class="panel" id="booting">⛓ Starting an Ethereum blockchain in your browser and deploying the ExamChain smart contract…</div>'
+  );
+  await loadScript("vendor/ganache.min.js");
+  const chain = Ganache.provider({
+    wallet: { deterministic: true, totalAccounts: 10 },
+    chain: { chainId: 1337 },
+    logging: { quiet: true },
+  });
+  provider = new ethers.BrowserProvider(chain);
+  provider.pollingInterval = 500;
+
+  const art = window.EXAMCHAIN_ARTIFACT;
+  const addrs = await provider.send("eth_accounts", []);
+  const admin = await provider.getSigner(addrs[0]);
+  const deployed = await new ethers.ContractFactory(art.abi, art.bytecode, admin).deploy();
+  await deployed.waitForDeployment();
+
+  const accounts = art.roles.map((r) => ({ ...r, address: ethers.getAddress(addrs[r.index]) }));
+  const grant = { SETTER: "addSetter", AUTHORITY: "addAuthority", CENTER: "addCenter" };
+  for (const a of accounts) {
+    if (grant[a.role]) await (await deployed[grant[a.role]](a.address)).wait();
   }
-  provider = new ethers.JsonRpcProvider(CFG.rpcUrl);
+  CFG = { address: await deployed.getAddress(), abi: art.abi, accounts, inBrowser: true };
+
+  $("#booting").remove();
+  $("#modeNote").hidden = false;
+  $("#metamaskBtn").hidden = true;
+}
+
+async function init() {
+  const forceWeb = new URLSearchParams(location.search).get("mode") === "web";
   try {
-    if ((await provider.getCode(CFG.address)) === "0x") throw new Error("no contract");
-  } catch {
-    document.querySelector("main").innerHTML =
-      '<div class="panel"><h3>Cannot reach the ExamChain contract</h3><p class="hint">Make sure <code>npm run node</code> is running, then run <code>npm run deploy</code> again (the local chain resets every time the node restarts) and reload this page.</p></div>';
+    if (CFG && !forceWeb) {
+      provider = new ethers.JsonRpcProvider(CFG.rpcUrl);
+      if ((await provider.getCode(CFG.address)) === "0x") throw new Error("no contract");
+    } else {
+      await startInBrowserChain();
+    }
+  } catch (e) {
+    console.error(e);
+    document.querySelector("main").innerHTML = CFG?.rpcUrl && !forceWeb
+      ? '<div class="panel"><h3>Cannot reach the ExamChain contract</h3><p class="hint">Make sure <code>npm run node</code> is running, then run <code>npm run deploy</code> again (the local chain resets every time the node restarts) and reload this page.</p></div>'
+      : `<div class="panel"><h3>Could not start the in-browser blockchain</h3><p class="hint">${esc(e.message)}. Try reloading the page or using Chrome/Edge.</p></div>`;
     return;
   }
   reader = new ethers.Contract(CFG.address, CFG.abi, provider);

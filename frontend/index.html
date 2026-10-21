@@ -27,6 +27,7 @@
     <span>🕒 Blockchain time: <b id="chainTime">–</b></span>
     <span>📦 Block: <b id="blockNo">–</b></span>
     <span>📄 Contract: <code id="contractAddr">–</code></span>
+    <span id="modeNote" hidden>🌐 Live demo: the blockchain runs in your browser. Refreshing starts a fresh chain.</span>
     <span class="spacer"></span>
     <button id="ffBtn" class="ghost small" title="Demo only: advances the local blockchain clock">⏩ Fast-forward 5 min</button>
   </div>
@@ -168,6 +169,7 @@
 
   <script src="vendor/ethers.umd.min.js"></script>
   <script src="config.js"></script>
+  <script src="contract.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

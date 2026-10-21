@@ -4,6 +4,20 @@ A decentralized application (DApp) that prevents question paper leaks using
 **encryption, a time-locked smart contract, multi-authority approval and an
 immutable audit trail** on the Ethereum blockchain.
 
+## 🌐 Live demo
+**https://thatguy12034.github.io/ExamChain/**
+
+No installation or wallet needed. The page starts an Ethereum blockchain (Ganache) inside your browser,
+deploys the ExamChain smart contract to it and assigns the demo roles. Refreshing the page starts a fresh chain.
+
+To update the hosted site after changing the contract or frontend:
+```bash
+npm run build:web
+```
+```bash
+git subtree push --prefix frontend origin gh-pages
+```
+
 ## Tech stack
 | Layer | Technology |
 |---|---|

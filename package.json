@@ -6,7 +6,8 @@
     "test": "hardhat test",
     "node": "hardhat node",
     "deploy": "hardhat run scripts/deploy.js --network localhost",
-    "start": "node server.js"
+    "start": "node server.js",
+    "build:web": "hardhat compile && node scripts/build-web.js"
   },
   "keywords": [],
   "author": "",

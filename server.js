@@ -10,7 +10,7 @@ const TYPES = { ".html": "text/html", ".js": "text/javascript", ".css": "text/cs
 http
   .createServer((req, res) => {
     const urlPath = decodeURIComponent(req.url.split("?")[0]);
-    const file = path.join(ROOT, urlPath === "/" ? "index.html" : urlPath);
+    const file = path.join(ROOT, urlPath.endsWith("/") ? urlPath + "index.html" : urlPath);
     if (!file.startsWith(ROOT)) {
       res.writeHead(403);
       return res.end();

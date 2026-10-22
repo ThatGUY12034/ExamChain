@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
+  <title>ExamChain</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Orbitron:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="shell">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-mark" data-icon="link"></span>
+        <div>
+          <div class="brand-name">ExamChain</div>
+          <div class="brand-sub">Leak-proof exam papers</div>
+        </div>
+      </div>
+
+      <nav class="nav" id="tabs" aria-label="Sections">
+        <button data-tab="dashboard" class="active"><span data-icon="dashboard"></span>Dashboard</button>
+        <button data-tab="admin"><span data-icon="shield"></span>Admin</button>
+        <button data-tab="setter"><span data-icon="pen"></span>Paper Setter</button>
+        <button data-tab="authority"><span data-icon="users"></span>Authorities</button>
+        <button data-tab="center"><span data-icon="building"></span>Exam Center</button>
+        <button data-tab="leak"><span data-icon="alert"></span>Leak Check</button>
+        <button data-tab="audit"><span data-icon="list"></span>Audit Log</button>
+      </nav>
+
+      <div class="identity">
+        <label for="accountSelect">Acting as</label>
+        <select id="accountSelect"></select>
+        <div class="identity-row">
+          <span id="roleBadge" class="role-badge"></span>
+          <button id="metamaskBtn" class="btn ghost xs">MetaMask</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <div class="main-col">
+      <header class="topbar">
+        <div>
+          <h1 id="pageTitle">Dashboard</h1>
+          <p id="pageSub" class="page-sub">Live overview of every exam paper secured on the blockchain.</p>
+        </div>
+        <div class="chain-status">
+          <span class="pill live"><span class="dot"></span>Chain live</span>
+          <span class="pill"><span data-icon="box"></span>Block <b id="blockNo">–</b></span>
+          <span class="pill"><span data-icon="clock"></span><b id="chainTime">–</b></span>
+          <span class="pill mono" title="Smart contract address"><span data-icon="file"></span><code id="contractAddr">–</code></span>
+          <button id="ffBtn" class="btn ghost sm" title="Demo only: advances the blockchain clock"><span data-icon="forward"></span>+5 min</button>
+        </div>
+      </header>
+
+      <div id="modeNote" class="mode-note" hidden>
+        <span data-icon="info"></span>
+        Live demo: a full Ethereum blockchain is running inside your browser. Refreshing the page starts a fresh chain.
+      </div>
+
+      <main>
+        <!-- Dashboard -->
+        <section id="tab-dashboard" class="tab active">
+          <div class="hero">
+            <div>
+              <span class="eyebrow">Time-locked · Multi-signature · Immutable</span>
+              <h2>Sealed until the exam begins.</h2>
+              <p>Question papers are encrypted in the browser, locked by a smart contract and released only at exam time after two of three authorities approve. Every action is recorded on-chain.</p>
+            </div>
+            <div class="hero-steps">
+              <div><span data-icon="lock"></span>Encrypt</div>
+              <div><span data-icon="users"></span>Approve 2 of 3</div>
+              <div><span data-icon="clock"></span>Time-lock</div>
+              <div><span data-icon="check"></span>Verify</div>
+            </div>
+          </div>
+          <div class="stats" id="stats"></div>
+          <div class="section-head"><h3>Exams</h3><span class="muted">Newest first</span></div>
+          <div id="examList" class="cards"></div>
+        </section>
+
+        <!-- Admin -->
+        <section id="tab-admin" class="tab">
+          <div class="grid2">
+            <form id="scheduleForm" class="panel">
+              <div class="panel-head"><span data-icon="clock"></span><h3>Schedule an exam</h3></div>
+              <label>Subject <input name="subject" required value="Blockchain Technology (CE-701)" /></label>
+              <label>Paper setter <select name="setter" id="setterSelect"></select></label>
+              <label>Exam start (unlock) time <input type="datetime-local" name="unlock" step="1" required /></label>
+              <div class="chips">
+                <button type="button" class="chip" data-mins="2">+2 min</button>
+                <button type="button" class="chip" data-mins="10">+10 min</button>
+                <button type="button" class="chip" data-mins="60">+1 hour</button>
+              </div>
+              <button type="submit" class="btn primary">Schedule exam</button>
+            </form>
+            <form id="roleForm" class="panel">
+              <div class="panel-head"><span data-icon="shield"></span><h3>Grant a role</h3></div>
+              <p class="hint">Demo accounts already have their roles from deployment. Use this to add a new person.</p>
+              <label>Pick an account <select id="roleAccount"></select></label>
+              <label>Wallet address <input name="addr" required placeholder="0x… (filled from the account above, or paste any address)" /></label>
+              <label>Role
+                <select name="role">
+                  <option value="addSetter">Paper Setter</option>
+                  <option value="addAuthority">Exam Authority</option>
+                  <option value="addCenter">Exam Center</option>
+                </select>
+              </label>
+              <button type="submit" class="btn primary">Grant role</button>
+              <div class="divider"></div>
+              <div class="panel-head"><span data-icon="alert"></span><h3>Cancel an exam</h3></div>
+              <label>Exam <select name="cancelExam" class="examSelect"></select></label>
+              <button type="button" id="cancelBtn" class="btn danger">Cancel exam</button>
+            </form>
+          </div>
+        </section>
+
+        <!-- Setter -->
+        <section id="tab-setter" class="tab">
+          <div class="grid2">
+            <form id="uploadForm" class="panel">
+              <div class="panel-head"><span class="step-no">1</span><h3>Encrypt &amp; commit paper</h3></div>
+              <p class="hint">The paper is encrypted with AES-256-GCM <b>inside your browser</b>. Only its SHA-256 hash and a commitment to the key go on the blockchain.</p>
+              <label>Exam <select name="exam" class="examSelect"></select></label>
+              <label>Question paper (PDF or any file) <input type="file" name="file" required /></label>
+              <button type="submit" class="btn primary"><span data-icon="lock"></span>Encrypt &amp; upload</button>
+              <div id="uploadResult"></div>
+            </form>
+            <form id="releaseForm" class="panel">
+              <div class="panel-head"><span class="step-no">2</span><h3>Release key at exam time</h3></div>
+              <p class="hint">Works only after the exam start time <b>and</b> after 2 of 3 authorities approve. The key must match the commitment.</p>
+              <label>Exam <select name="exam" class="examSelect"></select></label>
+              <label>Secret key (0x…) <input name="key" required placeholder="Paste key or load key file" /></label>
+              <label>or load key file <input type="file" id="keyFile" accept=".txt" /></label>
+              <button type="submit" class="btn primary"><span data-icon="key"></span>Release key</button>
+            </form>
+          </div>
+        </section>
+
+        <!-- Authority -->
+        <section id="tab-authority" class="tab">
+          <div class="panel">
+            <div class="panel-head"><span data-icon="users"></span><h3>Approve key release</h3></div>
+            <p class="hint">Two-of-three multi-signature. No single person can unlock a paper.</p>
+            <div id="approvalList"></div>
+          </div>
+        </section>
+
+        <!-- Center -->
+        <section id="tab-center" class="tab">
+          <div class="grid2">
+            <form id="receiveForm" class="panel">
+              <div class="panel-head"><span class="step-no">1</span><h3>Receive encrypted paper</h3></div>
+              <p class="hint">Load the <code>.enc</code> file received from the university. Its hash is checked against the blockchain and the download is logged.</p>
+              <label>Exam <select name="exam" class="examSelect"></select></label>
+              <label>Encrypted file (.enc) <input type="file" name="file" required /></label>
+              <button type="submit" class="btn primary">Verify &amp; log receipt</button>
+              <div id="receiveResult"></div>
+            </form>
+            <form id="decryptForm" class="panel">
+              <div class="panel-head"><span class="step-no">2</span><h3>Decrypt at exam time</h3></div>
+              <p class="hint">After release, the key is read from the blockchain. The decrypted paper is re-hashed to prove it was not tampered with.</p>
+              <label>Exam <select name="exam" class="examSelect"></select></label>
+              <label>Encrypted file (.enc) <input type="file" name="file" required /></label>
+              <button type="submit" class="btn primary"><span data-icon="unlock"></span>Decrypt &amp; verify</button>
+              <div id="decryptResult"></div>
+            </form>
+          </div>
+        </section>
+
+        <!-- Leak -->
+        <section id="tab-leak" class="tab">
+          <form id="leakForm" class="panel narrow">
+            <div class="panel-head"><span data-icon="alert"></span><h3>Report a suspected leak</h3></div>
+            <p class="hint">Found a "leaked paper" on WhatsApp or Telegram before the exam? Upload it. If its hash matches the committed paper, the leak is <b>proven on-chain</b> with a timestamp and the exam is marked compromised.</p>
+            <label>Exam <select name="exam" class="examSelect"></select></label>
+            <label>Suspected file <input type="file" name="file" required /></label>
+            <button type="submit" class="btn danger">Check &amp; report</button>
+            <div id="leakResult"></div>
+          </form>
+        </section>
+
+        <!-- Audit -->
+        <section id="tab-audit" class="tab">
+          <div class="panel">
+            <div class="panel-head"><span data-icon="list"></span><h3>Immutable audit trail</h3></div>
+            <p class="hint">Every action ever taken, read directly from blockchain events. Nobody, not even the admin, can edit or delete these.</p>
+            <ol id="auditList" class="timeline"></ol>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer">
+        ExamChain · Blockchain-based exam paper leak prevention · Built by ThatGUY12034 ·
+        <a href="https://github.com/ThatGUY12034/ExamChain" target="_blank" rel="noopener">Source on GitHub</a>
+      </footer>
+    </div>
+  </div>
+
+  <div id="boot" class="boot" hidden>
+    <div class="boot-card">
+      <div class="spinner" aria-hidden="true"></div>
+      <h3>Starting blockchain</h3>
+      <p>Launching an Ethereum network in your browser and deploying the ExamChain smart contract…</p>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="../vendor/ethers.umd.min.js"></script>
+  <script src="../config.js"></script>
+  <script src="../contract.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
